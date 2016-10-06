@@ -28,13 +28,12 @@ if ret == True:
     corners2 = cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),criteria)
     imgpoints.append(corners2)
 
-    print corners2
-
     # Draw and display the corners
-    print img, corners, ret
-    img = cv2.drawChessboardCorners(img, (7,6), corners,ret)
+    imgr = cv2.drawChessboardCorners(img, (7,6), corners, ret)
+    img = cv2.drawChessboardCorners(img, (7,6), corners2,ret)
 
     cv2.imshow('img',img)
+    cv2.imshow('raw corners', imgr)
     cv2.waitKey(0)
 
 cv2.destroyAllWindows()
