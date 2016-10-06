@@ -32,8 +32,28 @@ if ret == True:
     imgr = cv2.drawChessboardCorners(img, (7,6), corners, ret)
     img = cv2.drawChessboardCorners(img, (7,6), corners2,ret)
 
-    cv2.imshow('img',img)
-    cv2.imshow('raw corners', imgr)
-    cv2.waitKey(0)
+    # cv2.imshow('img',img)
+    # cv2.imshow('raw corners', imgr)
+    # cv2.waitKey(0)
 
 cv2.destroyAllWindows()
+
+# Calibrating
+ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
+
+# Prepare image
+img = cv2.imread(fname)
+h,  w = img.shape[:2]
+newcameramtx, roi=cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
+print newcameramtx, roi
+
+# undistort
+dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
+
+# crop the image
+# x,y,w,h = roi
+# dst = dst[y:y+h, x:x+w]
+# cv2.imwrite('calibresult.png',dst)
+
+cv2.imshow('result', dst)
+cv2.waitKey(0)
