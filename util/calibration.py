@@ -2,8 +2,9 @@ import numpy as np
 import cv2
 import glob
 
-boardRow = 6
-boardCol = 7
+# Notice : Use number of corners, but the order doesn't matter
+boardRow = 9
+boardCol = 6
 
 # termination criteria
 criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -19,7 +20,7 @@ objp[:,:2] = np.mgrid[0:boardCol,0:boardRow].T.reshape(-1,2)
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 
-fname = 'left01.jpg'
+fname = 'left11.jpg'
 
 img = cv2.imread(fname)
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -57,9 +58,9 @@ print newcameramtx, roi
 dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
 
 # crop the image
-# x,y,w,h = roi
-# dst = dst[y:y+h, x:x+w]
-# cv2.imwrite('calibresult.png',dst)
+x,y,w,h = roi
+dst = dst[y:y+h, x:x+w]
+cv2.imwrite('calibresult.png',dst)
 
 cv2.imshow('result', dst)
 cv2.waitKey(0)
