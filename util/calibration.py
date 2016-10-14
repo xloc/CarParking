@@ -52,15 +52,13 @@ for imgFile in ['left01.jpg']:
 cv2.destroyAllWindows()
 
 img = cv2.imread(imgFile)
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # Calibrating
-ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
+ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img.shape[0:2][::-1],None,None)
 
-
-def show_undistorted_img(path):
+def show_undistorted_img(path, mtx, dist):
     # Prepare image
-    img = cv2.imread(path, mtx, dist)
+    img = cv2.imread(path)
     h, w = img.shape[:2]
     camera_mtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
     print camera_mtx, roi
