@@ -57,19 +57,21 @@ gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 # Calibrating
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
 
-# Prepare image
-img = cv2.imread(imgFile)
-h,  w = img.shape[:2]
-newcameramtx, roi=cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
-print newcameramtx, roi
 
-# undistort
-dst = cv2.undistort(img, mtx, dist, None, newcameramtx)
+def show_undistorted_img(path):
+    # Prepare image
+    img = cv2.imread(path, mtx, dist)
+    h, w = img.shape[:2]
+    camera_mtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
+    print camera_mtx, roi
+    # undistort
+    dst = cv2.undistort(img, mtx, dist, None, camera_mtx)
+    # crop the image
+    x, y, w, h = roi
+    dst = dst[y:y + h, x:x + w]
+    cv2.imwrite('calibresult.png', dst)
+    cv2.imshow('result', dst)
+    cv2.waitKey(0)
 
-# crop the image
-x,y,w,h = roi
-dst = dst[y:y+h, x:x+w]
-cv2.imwrite('calibresult.png',dst)
 
-cv2.imshow('result', dst)
-cv2.waitKey(0)
+show_undistorted_img(imgFile, mtx, dist)
