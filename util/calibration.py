@@ -20,36 +20,45 @@ objp[:,:2] = np.mgrid[0:boardCol,0:boardRow].T.reshape(-1,2)
 objpoints = [] # 3d point in real world space
 imgpoints = [] # 2d points in image plane.
 
-fname = 'left11.jpg'
 
-img = cv2.imread(fname)
-gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+def add_points_from_file(path):
+    img = cv2.imread(path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# Find the chess board corners
-ret, corners = cv2.findChessboardCorners(gray, (boardCol,boardRow),None)
+    # Find the chess board corners
+    ret, corners = cv2.findChessboardCorners(gray, (boardCol, boardRow), None)
 
-# If found, add object points, image points (after refining them)
-if ret == True:
-    objpoints.append(objp)
+    # If found, add object points, image points (after refining them)
+    if ret == True:
+        objpoints.append(objp)
 
-    corners2 = cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),criteria)
-    imgpoints.append(corners2)
+        corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+        imgpoints.append(corners2)
 
-    # Draw and display the corners
-    imgr = cv2.drawChessboardCorners(img, (boardCol,boardRow), corners, ret)
-    img = cv2.drawChessboardCorners(img, (boardCol,boardRow), corners2,ret)
+        # Draw and display the corners
+        if __debug__:
+            imgr = cv2.drawChessboardCorners(img, (boardCol, boardRow), corners, ret)
+            img = cv2.drawChessboardCorners(img, (boardCol, boardRow), corners2, ret)
 
-    # cv2.imshow('img',img)
-    # cv2.imshow('raw corners', imgr)
-    # cv2.waitKey(0)
+            cv2.imshow('img', img)
+            cv2.imshow('raw corners', imgr)
+            cv2.waitKey(0)
+            cv2.destroyWindow('img')
+            cv2.destroyWindow('raw corners')
+
+for imgFile in ['left01.jpg']:
+    add_points_from_file(imgFile)
 
 cv2.destroyAllWindows()
+
+img = cv2.imread(imgFile)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # Calibrating
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
 
 # Prepare image
-img = cv2.imread(fname)
+img = cv2.imread(imgFile)
 h,  w = img.shape[:2]
 newcameramtx, roi=cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
 print newcameramtx, roi
