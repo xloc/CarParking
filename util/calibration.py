@@ -27,10 +27,10 @@ def calibrate(board_size, file_iter):
 
     cv2.destroyAllWindows()
 
-    img = cv2.imread(imgFile)
+    gray = cv2.imread(imgFile, cv2.IMREAD_GRAYSCALE)
 
     # Calibrating
-    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, img.shape[0:2][::-1], None, None)
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
     show_undistorted_img(imgFile, mtx, dist)
 
