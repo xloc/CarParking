@@ -5,6 +5,9 @@ import time
 import threading
 import picamera
 
+import pydevd
+pydevd.settrace('192.168.1.105', port=52481, stdoutToServer=True, stderrToServer=True)
+
 # 创建一个图像处理序列
 done = False
 lock = threading.Lock()
