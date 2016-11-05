@@ -2,15 +2,14 @@ import io
 import time
 import threading
 import picamera
-import copy
 
 # import pydevd
 # pydevd.settrace('192.168.1.111', port=52481, stdoutToServer=True, stderrToServer=True)
 
 frameCaptured = threading.Event()
 
-streamLock = threading.Lock()
-picStream = io.BytesIO()
+lock = threading.Lock()
+imgdata = 0
 
 done = False
 
@@ -18,21 +17,28 @@ done = False
 def get_framestream():
     # type: () -> string
     if frameCaptured.wait():
-        with streamLock:
-            picStream.seek(0)
-            stream = picStream.read()
+        with lock:
+            data = imgdata
 
         frameCaptured.clear()
-        return stream
+        return data
 
 
 def streams_provider():
+    global imgdata
+    stream = io.BytesIO()
+    prevtime = time.clock()
+
     while not done:
-        with streamLock:
-            picStream.seek(0)
-            picStream.truncate()
-            yield picStream
-            frameCaptured.set()
+        yield stream
+
+        stream.seek(0)
+        with lock:
+            imgdata = stream.read()
+        frameCaptured.set()
+
+        stream.seek(0)
+        stream.truncate()
 
 
 def capture_loop():
@@ -58,7 +64,7 @@ if __name__ == '__main__':
     while testing:
         try:
             print "start %d" % order
-            order+=1
+            order += 1
             imgstr = get_framestream()
             img = extractpic.string2image(imgstr,
                                           (640, 480))
