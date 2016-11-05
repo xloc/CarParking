@@ -4,7 +4,7 @@ import threading
 import picamera
 
 # import pydevd
-# pydevd.settrace('192.168.1.111', port=52481,           =True)
+# pydevd.settrace('192.168.1.111', port=52481, stdoutToServer=True, stderrToServer=True)
 
 frameCaptured = threading.Event()
 
@@ -23,19 +23,12 @@ def get_framestream():
         frameCaptured.clear()
         return data
 
-starttime = 0
-endtime = 0
-capcount = 0
+
 def streams_provider():
     global imgdata
     stream = io.BytesIO()
-    prevtime = time.clock()
 
-    global starttime, endtime, capcount
-    starttime = time.clock()
     while not done:
-        capcount += 1
-
         yield stream
 
         stream.seek(0)
@@ -46,7 +39,6 @@ def streams_provider():
         stream.seek(0)
         stream.truncate()
 
-    endtime = time.clock()
 
 def capture_loop():
     with picamera.PiCamera() as camera:
@@ -82,9 +74,3 @@ if __name__ == '__main__':
 
     testing = False
     done = True
-
-    time.sleep(1)
-
-    print 'time elapse', endtime-starttime
-    print 'capture count', capcount
-    print 'frequence', capcount/(endtime-starttime)
