@@ -7,6 +7,7 @@ import picamera
 # pydevd.settrace('192.168.1.111', port=52481, stdoutToServer=True, stderrToServer=True)
 
 frameCaptured = threading.Event()
+frameRequested = threading.Event()
 
 lock = threading.Lock()
 imgdata = 0
@@ -16,6 +17,7 @@ done = False
 
 def get_framestream():
     # type: () -> string
+    frameRequested.set()
     if frameCaptured.wait():
         with lock:
             data = imgdata
@@ -29,15 +31,17 @@ def streams_provider():
     stream = io.BytesIO()
 
     while not done:
-        yield stream
+        if frameRequested.wait(0.5):
+            yield stream
 
-        stream.seek(0)
-        with lock:
-            imgdata = stream.read()
-        frameCaptured.set()
+            stream.seek(0)
+            with lock:
+                imgdata = stream.read()
+            frameCaptured.set()
+            frameRequested.clear()
 
-        stream.seek(0)
-        stream.truncate()
+            stream.seek(0)
+            stream.truncate()
 
 
 def capture_loop():
@@ -47,9 +51,10 @@ def capture_loop():
         camera.start_preview()
         time.sleep(2)
         print 'start capture'
-        camera.capture_sequence(streams_provider(),
-                                use_video_port=True,
-                                format='bgr')
+        camera.capture_sequence(
+            streams_provider(),
+            # use_video_port=True,
+            format='bgr')
 
 if __name__ == '__main__':
     import cv2
@@ -65,12 +70,15 @@ if __name__ == '__main__':
             print "start %d" % order
             order += 1
             imgstr = get_framestream()
-            img = extractpic.string2image(imgstr,
-                                          (640, 480))
-            cv2.imwrite('a%d.jpg' % order, img)
-            time.sleep(1)
-        except:
-            break
+            # img = extractpic.string2image(imgstr,
+            #                               (640, 480))
+            # cv2.imwrite('./pic/a%d.jpg' % order, img)
 
-    testing = False
-    done = True
+            time.sleep(0.1)
+
+            if order > 20:
+                raise KeyboardInterrupt
+        except:
+
+            testing = False
+            done = True
