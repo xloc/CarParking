@@ -32,7 +32,7 @@ def calibrate(board_size, file_iter):
     # Calibrating
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
-    show_undistorted_img(imgFile, mtx, dist)
+    return (ret, mtx, dist, rvecs, tvecs)
 
 
 def add_points_from_file(path, board_size):
@@ -56,11 +56,11 @@ def add_points_from_file(path, board_size):
             imgr = cv2.drawChessboardCorners(img, board_size, corners, ret)
             img = cv2.drawChessboardCorners(img, board_size, corners2, ret)
 
-            cv2.imshow('img', img)
-            cv2.imshow('raw corners', imgr)
-            cv2.waitKey(0)
-            cv2.destroyWindow('img')
-            cv2.destroyWindow('raw corners')
+            # cv2.imshow('img', img)
+            # cv2.imshow('raw corners', imgr)
+            # cv2.waitKey(0)
+            # cv2.destroyWindow('img')
+            # cv2.destroyWindow('raw corners')
 
 
 def show_undistorted_img(path, mtx, dist):
@@ -68,16 +68,41 @@ def show_undistorted_img(path, mtx, dist):
     img = cv2.imread(path)
     h, w = img.shape[:2]
     camera_mtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
-    print camera_mtx, roi
+    # print camera_mtx, roi
+    
     # undistort
     dst = cv2.undistort(img, mtx, dist, None, camera_mtx)
     # crop the image
     x, y, w, h = roi
     dst = dst[y:y + h, x:x + w]
-    cv2.imwrite('calibresult.png', dst)
-    cv2.imshow('result', dst)
+    # cv2.imwrite('calibresult.png', dst)
+
+    resize = lambda img, f: cv2.resize(img, dsize=(0, 0), fx=f, fy=f)
+
+    cv2.imshow('original', resize(img, 0.3))
+    cv2.imshow('result', resize(dst, 0.3))
     cv2.waitKey(0)
 
 if __name__ == '__main__':
+    import glob
+    para = calibrate((7,5), glob.glob('./*.jpg'))
 
-    calibrate((9, 6), ['left01.jpg'])
+    (ret, mtx, dist, rvecs, tvecs) = para
+
+    # for i in 'ret, mtx, dist, rvecs, tvecs'.split(', '):
+    #     print i, ':', type(eval(i))
+
+    listed = {}
+    listed['ret'] = ret
+    listed['mtx'] = mtx.tolist()
+    listed['dist'] = dist.tolist()
+    # listed['rvecs'] = rvecs
+    # listed['tvecs'] = tvecs
+
+    import json
+    f = open('parameters.json', 'w')
+    json.dump(listed, f)
+    f.close()
+
+    for img in glob.glob('*.jpg'):
+        show_undistorted_img(img, mtx, dist)

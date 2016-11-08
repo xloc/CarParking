@@ -36,13 +36,17 @@ colors = [
 
 edge = cv2.cvtColor(edge, code=cv2.COLOR_GRAY2BGR)
 print [contour.shape for contour in contours]
-import random
+
 
 areas = []
-# for ct in contours:
-#
-#     areas.append()
+for ct in contours:
+    area = cv2.contourArea(ct)
+    areas.append(area)
 
+areas.sort()
+print areas
+
+import random
 for i in range(len(contours)):
     drawn = cv2.drawContours(edge, contours, i, color=random.choice(colors));
 
