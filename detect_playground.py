@@ -31,9 +31,11 @@ edge = cv2.cvtColor(edge, code=cv2.COLOR_GRAY2BGR)
 hierarchy = hierarchy[0]
 
 
-def tour(node, layer=0):
+def tour(node, layer=0, visual=False):
     def p(text):
         print '%s%s' % ('\t' * layer, text)
+
+    p = p if visual else lambda x: None
 
     while True:
         p('> %s' % node)
@@ -53,6 +55,13 @@ def tour(node, layer=0):
     p('<')
 
 
+def spot(node):
+    childidx = hierarchy[node][2]
+    if childidx < 0:
+        return
+
+    for ni in tour(childidx):
+        yield ni
 
 
 EXPECTED_SUBCONTOUR_COUNT = 6
