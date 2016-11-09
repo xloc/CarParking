@@ -1,4 +1,5 @@
 import cv2
+import itertools
 import numpy as np
 
 
@@ -86,13 +87,14 @@ def hierarchy_criteria():
 
     return satisfied_contour
 
-print hierarchy_criteria()
+valid_contour_roots = hierarchy_criteria()
+
+assert len(valid_contour_roots) == 1, 'More than 1 valid contour root found'
+
+rootidx = valid_contour_roots[0]
 
 
 
-
-
-'''
 # Utility function for distance eval
 dist2 = lambda p, q: (p[0]-q[0])**2 + (p[1]-q[1])**2
 
@@ -106,7 +108,9 @@ fcontours = []
 last_area = 0
 last_o = (0, 0)
 
-for ct in contours:
+valid_contours = itertools.imap(lambda rtn: contours[rtn[0]], spot(rootidx))
+
+for ct in valid_contours:
     area = cv2.contourArea(ct)
 
     if area < MIN_AREA_CRITERIA:
@@ -148,7 +152,6 @@ colors = [
     (255, 0, 255)
 ]
 
-import itertools
 icolor = itertools.cycle(colors)
 
 drawn = edge
@@ -158,4 +161,3 @@ for i in range(len(contours)):
     drawn = cv2.drawContours(edge, contours, i, color=icolor.next());
 
 imshow(drawn)
-'''
