@@ -54,36 +54,30 @@ def tour(node, layer=0):
 
 
 
-colors = [
-    (255, 0, 0),
-    (0, 255, 0),
-    (0, 0, 255),
-    (255, 255, 0),
-    (0, 255, 255),
-    (255, 0, 255)
-]
 
-import itertools
-icolor = itertools.cycle(colors)
-drawn = edge
-
-for i, l in tour(0):
-
-    drawn = cv2.drawContours(edge, contours, i, color=icolor.next());
-
-    imshow(drawn)
+EXPECTED_SUBCONTOUR_COUNT = 6
 
 
+def hierarchy_criteria():
+    stat = {}
+    grandpaidx = 0
+    for i, l in tour(0):
+
+        if l == 0:
+            grandpaidx = i
+            stat[i] = 0
+        else:
+            stat[grandpaidx] += 1
 
 
+    satisfied_contour = []
+    for k, v in stat.items():
+        if v > EXPECTED_SUBCONTOUR_COUNT:
+            satisfied_contour.append(k)
 
+    return satisfied_contour
 
-
-
-
-
-
-
+print hierarchy_criteria()
 
 
 
