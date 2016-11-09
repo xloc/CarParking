@@ -32,37 +32,60 @@ edge = cv2.cvtColor(edge, code=cv2.COLOR_GRAY2BGR)
 hierarchy = hierarchy[0]
 
 
-def tour(node, layer=0, visual=False):
-    def p(text):
-        print '%s%s' % ('\t' * layer, text)
+class Hierarchy:
+    def __init__(self, hrki):
+        self.hierarchy = hrki
+        
+    def tour(self, node, layer=0, visual=False):
+        def p(text):
+            print '%s%s' % ('\t' * layer, text)
+    
+        p = p if visual else lambda x: None
+    
+        while True:
+            p('> %s' % node)
+            yield node, layer
+    
+            # tour child
+            if self.hierarchy[node][2] >= 0:
+                for subnode in self.tour(self.hierarchy[node][2], layer+1):
+                    yield subnode
+    
+            # if no next
+            if self.hierarchy[node][0] >= 0:
+                node = self.hierarchy[node][0]
+            else:
+                break
+    
+        p('<')
+    
+    def spot(self, node):
+        childidx = self.hierarchy[node][2]
+        if childidx < 0:
+            return
+    
+        for ni in self.tour(childidx):
+            yield ni
 
-    p = p if visual else lambda x: None
+    def delete_node(self, idx):
+        shit = self.hierarchy[idx]
+        shitnextidx = shit[0]
+        shitprevidx = shit[1]
 
-    while True:
-        p('> %s' % node)
-        yield node, layer
+        if shitnextidx >= 0:
+            self.hierarchy[shitnextidx][1] = shitprevidx
+        if shitprevidx >= 0:
+            self.hierarchy[shitprevidx][0] = shitnextidx
 
-        # tour child
-        if hierarchy[node][2] >= 0:
-            for subnode in tour(hierarchy[node][2], layer+1):
-                yield subnode
+        bshit = self.hierarchy[shit[3]]
+        if bshit[2] == idx:
+            bshit[2] = shitnextidx
 
-        # if no next
-        if hierarchy[node][0] >= 0:
-            node = hierarchy[node][0]
-        else:
-            break
-
-    p('<')
+    def copy(self):
+        return Hierarchy(list(self.hierarchy))
 
 
-def spot(node):
-    childidx = hierarchy[node][2]
-    if childidx < 0:
-        return
-
-    for ni in tour(childidx):
-        yield ni
+m_hiera = Hierarchy(hierarchy)
 
 
 EXPECTED_SUBCONTOUR_COUNT = 6
@@ -71,7 +94,7 @@ EXPECTED_SUBCONTOUR_COUNT = 6
 def hierarchy_criteria():
     stat = {}
     grandpaidx = 0
-    for i, l in tour(0):
+    for i, l in m_hiera.tour(0):
 
         if l == 0:
             grandpaidx = i
@@ -99,54 +122,34 @@ rootidx = valid_contour_roots[0]
 dist2 = lambda p, q: (p[0]-q[0])**2 + (p[1]-q[1])**2
 
 
-def delete_node(idx):
-    shit = fhierarchy[idx]
-    shitnextidx = shit[0]
-    shitprevidx = shit[1]
-
-    if shitnextidx >= 0:
-        fhierarchy[shitnextidx][1] = shitprevidx
-    if shitprevidx >= 0:
-        fhierarchy[shitprevidx][0] = shitnextidx
-
-    bshit = fhierarchy[shit[3]]
-    if bshit[2] == idx:
-        bshit[2] = shitnextidx
-
-
 # Delete criteria specification
 MIN_AREA_CRITERIA = 100
 MIN_AREA_DIFF_CRITERIA = 10
 MIN_DISTANCE_CRITERIA = 10
 
 # Iteration init
-fcontours = []
-fhierarchy = list(hierarchy)
 last_area = 0
 last_o = (0, 0)
 
-for ctidx, l in spot(rootidx):
+for ctidx, l in m_hiera.spot(rootidx):
     ct = contours[ctidx]
 
     area = cv2.contourArea(ct)
 
     if area < MIN_AREA_CRITERIA:
-        delete_node(ctidx)
+        m_hiera.delete_node(ctidx)
         continue
 
     o, r = cv2.minEnclosingCircle(ct)
 
     if abs(area - last_area) < MIN_AREA_DIFF_CRITERIA:
         if dist2(o, last_o) < MIN_DISTANCE_CRITERIA:
-            delete_node(ctidx)
+            m_hiera.delete_node(ctidx)
             continue
 
     last_area = area
     last_o = o
 
-    fcontours[ctidx] = ct
-
-contours = fcontours
 
 
 
@@ -176,7 +179,7 @@ icolor = itertools.cycle(colors)
 drawn = edge
 
 
-for i, l in spot(rootidx):
+for i, l in m_hiera.spot(rootidx):
 
     drawn = cv2.drawContours(edge, [contours[i]], 0, color=icolor.next());
 
