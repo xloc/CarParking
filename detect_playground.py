@@ -24,35 +24,32 @@ image, contours, hierarchy = \
 
         cv2.CHAIN_APPROX_NONE)
 
-colors = [
-    (255, 0, 0),
-    (0, 255, 0),
-    (0, 0, 255),
-    (255, 255, 0),
-    (0, 255, 255),
-    (255, 0, 255)
-]
 
+# For colorful drawing
 edge = cv2.cvtColor(edge, code=cv2.COLOR_GRAY2BGR)
 
+# Utility function for distance eval
 dist2 = lambda p, q: (p[0]-q[0])**2 + (p[1]-q[1])**2
 
-fcontours = []
-
-MIN_AREA_CRITERIA = 10
+# Delete criteria specification
+MIN_AREA_CRITERIA = 100
+MIN_AREA_DIFF_CRITERIA = 10
 MIN_DISTANCE_CRITERIA = 10
 
+# Iteration init
+fcontours = []
 last_area = 0
 last_o = (0, 0)
+
 for ct in contours:
     area = cv2.contourArea(ct)
 
-    if area < 100:
+    if area < MIN_AREA_CRITERIA:
         continue
 
     o, r = cv2.minEnclosingCircle(ct)
 
-    if abs(area - last_area) < MIN_AREA_CRITERIA:
+    if abs(area - last_area) < MIN_AREA_DIFF_CRITERIA:
         if dist2(o, last_o) < MIN_DISTANCE_CRITERIA:
             continue
 
@@ -80,7 +77,14 @@ contours = fcontours
 #     imshow(img)
 
 
-
+colors = [
+    (255, 0, 0),
+    (0, 255, 0),
+    (0, 0, 255),
+    (255, 255, 0),
+    (0, 255, 255),
+    (255, 0, 255)
+]
 
 import itertools
 icolor = itertools.cycle(colors)
@@ -88,16 +92,7 @@ icolor = itertools.cycle(colors)
 drawn = edge
 
 for i in range(len(contours)):
-    cparam = cv2.minEnclosingCircle(contours[i])
-    print cparam
-
-    center, radius = cparam
 
     drawn = cv2.drawContours(edge, contours, i, color=icolor.next());
-    drawn = cv2.circle(
-        drawn,
-        center=tuple(map(int, center)),
-        radius=int(radius),
-        color=icolor.next())
 
     imshow(drawn)
