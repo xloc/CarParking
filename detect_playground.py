@@ -28,6 +28,68 @@ image, contours, hierarchy = \
 # For colorful drawing
 edge = cv2.cvtColor(edge, code=cv2.COLOR_GRAY2BGR)
 
+hierarchy = hierarchy[0]
+
+
+def tour(node, layer=0):
+    def p(text):
+        print '%s%s' % ('\t' * layer, text)
+
+    while True:
+        p('> %s' % node)
+        yield node, layer
+
+        # tour child
+        if hierarchy[node][2] >= 0:
+            for subnode in tour(hierarchy[node][2], layer+1):
+                yield subnode
+
+        # if no next
+        if hierarchy[node][0] >= 0:
+            node = hierarchy[node][0]
+        else:
+            break
+
+    p('<')
+
+
+
+colors = [
+    (255, 0, 0),
+    (0, 255, 0),
+    (0, 0, 255),
+    (255, 255, 0),
+    (0, 255, 255),
+    (255, 0, 255)
+]
+
+import itertools
+icolor = itertools.cycle(colors)
+drawn = edge
+
+for i, l in tour(0):
+
+    drawn = cv2.drawContours(edge, contours, i, color=icolor.next());
+
+    imshow(drawn)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 # Utility function for distance eval
 dist2 = lambda p, q: (p[0]-q[0])**2 + (p[1]-q[1])**2
 
@@ -60,10 +122,7 @@ for ct in contours:
 
 contours = fcontours
 
-# print [contour.shape for contour in contours][0:5]
 
-
-# print contours[0]
 
 
 # for ct in contours:
@@ -74,8 +133,8 @@ contours = fcontours
 #
 #     img = edge
 #     img = cv2.drawContours(img, [rectct], 0, (255, 255, 0))
-#     imshow(img)
 
+# imshow(img)
 
 colors = [
     (255, 0, 0),
@@ -95,4 +154,5 @@ for i in range(len(contours)):
 
     drawn = cv2.drawContours(edge, contours, i, color=icolor.next());
 
-    imshow(drawn)
+imshow(drawn)
+'''
