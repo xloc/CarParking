@@ -68,8 +68,6 @@ class Hierarchy:
             yield ni
 
     def delete_node(self, idx):
-        print 'del', idx
-
         node = self.hierarchy[idx]
         nexti = node[0]
         previ = node[1]
@@ -178,20 +176,6 @@ for ctidx, l in m_hiera.spot(rootidx):
     last_o = o
 
 
-
-
-
-# for ct in contours:
-#     rorect = cv2.minAreaRect(ct)
-#     rectpts = cv2.boxPoints(rorect)
-#     rectct = np.array([[pt] for pt in rectpts], dtype=np.int32)
-#     print rectct
-#
-#     img = edge
-#     img = cv2.drawContours(img, [rectct], 0, (255, 255, 0))
-
-# imshow(img)
-
 colors = [
     (255, 0, 0),
     (0, 255, 0),
@@ -203,11 +187,71 @@ colors = [
 
 icolor = itertools.cycle(colors)
 
-drawn = edge
+drawn = np.copy(edge)
 
 
-for i, l in m_hiera.spot(rootidx, visual=True):
+for i, l in m_hiera.spot(rootidx):
     # print i
     drawn = cv2.drawContours(drawn, [contours[i]], 0, color=icolor.next());
 
-    imshow(drawn)
+imshow(drawn)
+
+import collections
+Line = collections.namedtuple('Line', ['a','b','c'])
+Point = collections.namedtuple('Point', ['x','y'])
+
+
+def dist2line(pt, line):
+    pt = Point._make(pt)
+    line = Line._make(line)
+    return abs((line.a*pt.x + line.b*pt.y + line.c)/
+               ((line.a**2 + line.b**2)**0.5))
+
+
+def calcline(p1, p2):
+    p1 = Point._make(p1)
+    p2 = Point._make(p2)
+
+    a = p2.y - p1.y
+    b = p1.x - p2.x
+    c = p2.x * p1.y - p2.y * p1.x
+
+    return Line._make((a,b,c))
+
+
+class ParkingLot:
+    def __init__(self, contour):
+        self.contour = contour
+        self.rect = cv2.minAreaRect(contour)
+        self.corners = cv2.boxPoints(self.rect)
+
+    def determin_entrance(self, centerline):
+        corners = self.corners
+
+        dist_corner_map = []
+        for p in corners:
+            dist_corner_map.append(
+                (dist2line(p, centerline), p)
+            )
+
+        dist_corner_map.sort(key=lambda mp:mp[0])
+
+        print dist_corner_map
+
+    def draw(self, img):
+        print 'drawing'
+        rectct = np.array([[pt] for pt in self.corners], dtype=np.int32)
+        return cv2.drawContours(img, [rectct], 0, (255, 255, 0))
+
+
+parkplace = np.copy(edge)
+
+for i, l in m_hiera.spot(rootidx):
+    ct = contours[i]
+
+    if cv2.contourArea(ct) < 10000:
+        pl = ParkingLot(ct)
+
+        parkplace = pl.draw(parkplace)
+
+imshow(parkplace)
