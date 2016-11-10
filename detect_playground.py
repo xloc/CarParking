@@ -48,7 +48,7 @@ class Hierarchy:
     
             # tour child
             if self.hierarchy[node][2] >= 0:
-                for subnode in self.tour(self.hierarchy[node][2], layer+1):
+                for subnode in self.tour(self.hierarchy[node][2], layer+1,visual):
                     yield subnode
     
             # if no next
@@ -59,15 +59,17 @@ class Hierarchy:
     
         p('<')
     
-    def spot(self, node):
+    def spot(self, node, visual=False):
         childidx = self.hierarchy[node][2]
         if childidx < 0:
             return
     
-        for ni in self.tour(childidx):
+        for ni in self.tour(childidx, visual=visual):
             yield ni
 
     def delete_node(self, idx):
+        print 'del', idx
+
         shit = self.hierarchy[idx]
         shitnextidx = shit[0]
         shitprevidx = shit[1]
@@ -80,6 +82,12 @@ class Hierarchy:
         bshit = self.hierarchy[shit[3]]
         if bshit[2] == idx:
             bshit[2] = shitnextidx
+
+        # f = open('output', 'a')
+        # f.write(str(self.hierarchy))
+        # f.write('$')
+        # f.close()
+    # delete_node = lambda *args: None
 
     def copy(self):
         return Hierarchy(list(self.hierarchy))
@@ -179,8 +187,9 @@ icolor = itertools.cycle(colors)
 drawn = edge
 
 
-for i, l in m_hiera.spot(rootidx):
+for i, l in m_hiera.spot(rootidx, visual=True):
+# for i in [19, 21, 23, 25, 26, 28, 30, 31]:
+#     print i
+    drawn = cv2.drawContours(drawn, [contours[i]], 0, color=icolor.next());
 
-    drawn = cv2.drawContours(edge, [contours[i]], 0, color=icolor.next());
-
-imshow(drawn)
+    imshow(drawn)
