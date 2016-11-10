@@ -70,18 +70,37 @@ class Hierarchy:
     def delete_node(self, idx):
         print 'del', idx
 
-        shit = self.hierarchy[idx]
-        shitnextidx = shit[0]
-        shitprevidx = shit[1]
+        node = self.hierarchy[idx]
+        nexti = node[0]
+        previ = node[1]
+        childi = node[2]
+        parenti = node[3]
 
-        if shitnextidx >= 0:
-            self.hierarchy[shitnextidx][1] = shitprevidx
-        if shitprevidx >= 0:
-            self.hierarchy[shitprevidx][0] = shitnextidx
+        parent = self.hierarchy[parenti]
+        fchild = self.hierarchy[childi]
 
-        bshit = self.hierarchy[shit[3]]
-        if bshit[2] == idx:
-            bshit[2] = shitnextidx
+        if childi >= 0:
+            last_childi = childi
+            while self.hierarchy[last_childi][0] >= 0:
+                last_childi = self.hierarchy[last_childi][0]
+
+            if nexti >= 0:
+                self.hierarchy[nexti][1] = last_childi
+                self.hierarchy[last_childi][0] = nexti
+            if previ >= 0:
+                self.hierarchy[previ][0] = childi
+
+            if parent[2] == idx:
+                parent[2] = childi
+
+        else:
+            if nexti >= 0:
+                self.hierarchy[nexti][1] = previ
+            if previ >= 0:
+                self.hierarchy[previ][0] = nexti
+
+            if parent[2] == idx:
+                parent[2] = nexti
 
         # f = open('output', 'a')
         # f.write(str(self.hierarchy))
@@ -188,8 +207,7 @@ drawn = edge
 
 
 for i, l in m_hiera.spot(rootidx, visual=True):
-# for i in [19, 21, 23, 25, 26, 28, 30, 31]:
-#     print i
+    # print i
     drawn = cv2.drawContours(drawn, [contours[i]], 0, color=icolor.next());
 
     imshow(drawn)
