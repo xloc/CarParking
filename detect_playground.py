@@ -194,7 +194,7 @@ for i, l in m_hiera.spot(rootidx):
     # print i
     drawn = cv2.drawContours(drawn, [contours[i]], 0, color=icolor.next());
 
-imshow(drawn)
+# imshow(drawn)
 
 import collections
 Line = collections.namedtuple('Line', ['a','b','c'])
@@ -244,7 +244,9 @@ class ParkingLot:
         return cv2.drawContours(img, [rectct], 0, (255, 255, 0))
 
 
-parkplace = np.copy(edge)
+pp = np.copy(edge)
+
+places = []
 
 for i, l in m_hiera.spot(rootidx):
     ct = contours[i]
@@ -252,6 +254,18 @@ for i, l in m_hiera.spot(rootidx):
     if cv2.contourArea(ct) < 10000:
         pl = ParkingLot(ct)
 
-        parkplace = pl.draw(parkplace)
+        # pp = pl.draw(pp)
 
-imshow(parkplace)
+        places.append(pl)
+
+# imshow(pp)
+
+bound = contours[rootidx]
+
+eps = 0.05 * len(bound)
+bound = cv2.approxPolyDP(bound, eps, closed=True)
+# print len(bound)
+
+pp = cv2.drawContours(pp, [bound], 0, (255, 255, 0))
+
+imshow(pp)
