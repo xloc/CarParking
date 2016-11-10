@@ -1,6 +1,7 @@
 import cv2
 import itertools
 import numpy as np
+import util
 
 
 def imshow(img):
@@ -29,88 +30,10 @@ image, contours, hierarchy = \
 # For colorful drawing
 edge = cv2.cvtColor(edge, code=cv2.COLOR_GRAY2BGR)
 
+
+# Prepare hierarchy
 hierarchy = hierarchy[0]
-
-
-class Hierarchy:
-    def __init__(self, hrki):
-        self.hierarchy = hrki
-        
-    def tour(self, node, layer=0, visual=False):
-        def p(text):
-            print '%s%s' % ('\t' * layer, text)
-    
-        p = p if visual else lambda x: None
-    
-        while True:
-            p('> %s' % node)
-            yield node, layer
-    
-            # tour child
-            if self.hierarchy[node][2] >= 0:
-                for subnode in self.tour(self.hierarchy[node][2], layer+1,visual):
-                    yield subnode
-    
-            # if no next
-            if self.hierarchy[node][0] >= 0:
-                node = self.hierarchy[node][0]
-            else:
-                break
-    
-        p('<')
-    
-    def spot(self, node, visual=False):
-        childidx = self.hierarchy[node][2]
-        if childidx < 0:
-            return
-    
-        for ni in self.tour(childidx, visual=visual):
-            yield ni
-
-    def delete_node(self, idx):
-        node = self.hierarchy[idx]
-        nexti = node[0]
-        previ = node[1]
-        childi = node[2]
-        parenti = node[3]
-
-        parent = self.hierarchy[parenti]
-        fchild = self.hierarchy[childi]
-
-        if childi >= 0:
-            last_childi = childi
-            while self.hierarchy[last_childi][0] >= 0:
-                last_childi = self.hierarchy[last_childi][0]
-
-            if nexti >= 0:
-                self.hierarchy[nexti][1] = last_childi
-                self.hierarchy[last_childi][0] = nexti
-            if previ >= 0:
-                self.hierarchy[previ][0] = childi
-
-            if parent[2] == idx:
-                parent[2] = childi
-
-        else:
-            if nexti >= 0:
-                self.hierarchy[nexti][1] = previ
-            if previ >= 0:
-                self.hierarchy[previ][0] = nexti
-
-            if parent[2] == idx:
-                parent[2] = nexti
-
-        # f = open('output', 'a')
-        # f.write(str(self.hierarchy))
-        # f.write('$')
-        # f.close()
-    # delete_node = lambda *args: None
-
-    def copy(self):
-        return Hierarchy(list(self.hierarchy))
-
-
-m_hiera = Hierarchy(hierarchy)
+m_hiera = util.Hierarchy(hierarchy)
 
 
 EXPECTED_SUBCONTOUR_COUNT = 6
@@ -143,8 +66,7 @@ rootidx = valid_contour_roots[0]
 
 
 
-# Utility function for distance eval
-dist2 = lambda p, q: (p[0]-q[0])**2 + (p[1]-q[1])**2
+
 
 
 # Delete criteria specification
@@ -168,7 +90,7 @@ for ctidx, l in m_hiera.spot(rootidx):
     o, r = cv2.minEnclosingCircle(ct)
 
     if abs(area - last_area) < MIN_AREA_DIFF_CRITERIA:
-        if dist2(o, last_o) < MIN_DISTANCE_CRITERIA:
+        if util.dist2(o, last_o) < MIN_DISTANCE_CRITERIA:
             m_hiera.delete_node(ctidx)
             continue
 
@@ -176,47 +98,18 @@ for ctidx, l in m_hiera.spot(rootidx):
     last_o = o
 
 
-colors = [
-    (255, 0, 0),
-    (0, 255, 0),
-    (0, 0, 255),
-    (255, 255, 0),
-    (0, 255, 255),
-    (255, 0, 255)
-]
 
-icolor = itertools.cycle(colors)
 
 drawn = np.copy(edge)
 
 
 for i, l in m_hiera.spot(rootidx):
     # print i
-    drawn = cv2.drawContours(drawn, [contours[i]], 0, color=icolor.next());
+    drawn = cv2.drawContours(drawn, [contours[i]], 0, color=util.icolor.next());
 
 # imshow(drawn)
 
-import collections
-Line = collections.namedtuple('Line', ['a','b','c'])
-Point = collections.namedtuple('Point', ['x','y'])
 
-
-def dist2line(pt, line):
-    pt = Point._make(pt)
-    line = Line._make(line)
-    return abs((line.a*pt.x + line.b*pt.y + line.c)/
-               ((line.a**2 + line.b**2)**0.5))
-
-
-def calcline(p1, p2):
-    p1 = Point._make(p1)
-    p2 = Point._make(p2)
-
-    a = p2.y - p1.y
-    b = p1.x - p2.x
-    c = p2.x * p1.y - p2.y * p1.x
-
-    return Line._make((a,b,c))
 
 
 class ParkingLot:
@@ -231,7 +124,7 @@ class ParkingLot:
         dist_corner_map = []
         for p in corners:
             dist_corner_map.append(
-                (dist2line(p, centerline), p)
+                (util.dist2line(p, centerline), p)
             )
 
         dist_corner_map.sort(key=lambda mp:mp[0])
