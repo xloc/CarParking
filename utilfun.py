@@ -46,6 +46,15 @@ def polygonFit(contour, factor=0.05):
     return cv2.approxPolyDP(contour, eps, closed=True)
 
 
+def resize2(img, expected_width):
+    height, width = img.shape
+
+    factor = float(width) / expected_width
+    img = cv2.resize(img, dsize=(expected_width, int(height / factor)),
+                     interpolation=cv2.INTER_LINEAR)
+
+    return img
+
 class Hierarchy:
     def __init__(self, hrki):
         self.hierarchy = hrki

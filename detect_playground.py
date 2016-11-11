@@ -9,12 +9,6 @@ import processing_procedure as prop
 
 def perspective_analyse(img):
 
-    height, width = img.shape
-
-    factor = float(width) / 1000
-    img = cv2.resize(img, dsize=(1000, int(height / factor)),
-                     interpolation=cv2.INTER_LINEAR)
-
     # Section: Threshold processing
 
     imthres = prop.threshold_process(img, blur_size=7)
@@ -49,10 +43,10 @@ def perspective_analyse(img):
 
     bound = uf.polygonFit(contours[rootidx])
 
-    # # Debug Image Drawing
-    # imdebug = cv2.cvtColor(imthres, code=cv2.COLOR_GRAY2BGR)
-    # uf.drawContour(imdebug,bound)
-    # imshow(imdebug)
+    # Debug Image Drawing
+    imdebug = cv2.cvtColor(imthres, code=cv2.COLOR_GRAY2BGR)
+    uf.drawContour(imdebug,bound)
+    imshow(imdebug)
 
     pspt_param = prop.perspective_param(bound, (1000, 300))
 
@@ -87,7 +81,7 @@ def playground_analyse(imtailored):
 
     # Debug Image Drawing
     for ctidx,l in nest.spot(0,visual=True):
-        cv2.drawContours(imtd, [contours[ctidx]], 0, uf.icolor.next())
+        cv2.drawContours(imdebug, [contours[ctidx]], 0, uf.icolor.next())
     imshow(imdebug)
 
     # Calculate center line
@@ -127,12 +121,14 @@ def playground_analyse(imtailored):
 if __name__ == '__main__':
     # Load Image
     img = cv2.imread('playground.jpg')
+    # Convert Color
     img = cv2.cvtColor(img, code=cv2.COLOR_BGR2GRAY)
+    # Resize
+    img = uf.resize2(img, 1000)
     # Analyse perspective parameter
     pspt_param = perspective_analyse(img)
     # Do inverse perspective transformation
     imtailored = prop.warp_perspective(img, pspt_param, (1000, 300))
-    imshow(imtailored)
     # Playground analyse
     playground_analyse(imtailored)
 
