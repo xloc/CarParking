@@ -19,6 +19,7 @@ factor = float(width) / 1000
 img = cv2.resize(img, dsize=(1000, int(height / factor)),
                  interpolation=cv2.INTER_LINEAR)
 
+
 # Section: Find contours
 
 imthres = np.copy(img)
@@ -34,6 +35,7 @@ image, contours, hierarchy = cv2.findContours(
     cv2.RETR_TREE,
     cv2.CHAIN_APPROX_NONE
 )
+
 
 # Section: Contour filtering
 
@@ -70,8 +72,8 @@ for ctidx, l in nest.tour(0):
     last_area = area
     last_o = o
 
-# Subsection: Min nested contour count filtering
 
+# Subsection: Min nested contour count filtering
 
 # Using Min nested contours number Determine validation
 def hierarchy_criteria():
@@ -104,8 +106,6 @@ def polygonFit(contour, factor=0.05):
     # type: (object, float) -> np.ndarray
     eps = factor * len(contour)
     return cv2.approxPolyDP(contour, eps, closed=True)
-
-
 
 def perspective_correct():
     bound = polygonFit(contours[rootidx])
@@ -170,6 +170,7 @@ image, contours, hierarchy = cv2.findContours(
     cv2.CHAIN_APPROX_NONE
 )
 
+
 # Section: 2nd Contours filtering
 
 # Prepare hierarchy
@@ -206,14 +207,7 @@ for ctidx, l in nest.tour(0):
 
 
 
-
-
-
-
-
-
-
-
+#
 
 imtd = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
 
