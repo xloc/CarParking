@@ -35,6 +35,17 @@ def drawContour(img, contour):
     return cv2.drawContours(img, [contour], 0, icolor.next())
 
 
+def imshow(img):
+    cv2.imshow('show', img)
+    cv2.waitKey(0)
+
+
+def polygonFit(contour, factor=0.05):
+    # type: (object, float) -> np.ndarray
+    eps = factor * len(contour)
+    return cv2.approxPolyDP(contour, eps, closed=True)
+
+
 class Hierarchy:
     def __init__(self, hrki):
         self.hierarchy = hrki
@@ -140,7 +151,7 @@ class ParkingLot:
     def draw(self, img):
         print 'drawing'
         rectct = np.array([[pt] for pt in self.corners], dtype=np.int32)
-        return cv2.drawContours(img, [rectct], 0, (255, 255, 0))
+        return cv2.drawContours(img, [rectct], 0, icolor.next())
 
 
 colors = [
