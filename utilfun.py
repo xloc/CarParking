@@ -4,7 +4,7 @@ import itertools
 
 # Utility function for distance eval
 def dist(p, q):
-    return (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2
+    return ((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2) ** 1/2
 
 
 Line = collections.namedtuple('Line', ['a', 'b', 'c'])
@@ -28,6 +28,7 @@ def calcline(p1, p2):
 
     return Line._make((a, b, c))
 
+
 class Hierarchy:
     def __init__(self, hrki):
         self.hierarchy = hrki
@@ -40,7 +41,8 @@ class Hierarchy:
 
         while True:
             p('> %s' % node)
-            yield node, layer
+            if self.hierarchy[node][1] != -2:
+                yield node, layer
 
             # tour child
             if self.hierarchy[node][2] >= 0:
@@ -69,6 +71,10 @@ class Hierarchy:
         previ = node[1]
         childi = node[2]
         parenti = node[3]
+
+        if idx == 0:
+            self.hierarchy[0][1] = -2
+            return
 
         parent = self.hierarchy[parenti]
         fchild = self.hierarchy[childi]
