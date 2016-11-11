@@ -82,14 +82,37 @@ imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
 #     cv2.drawContours(imtd, [contours[ctidx]], 0, uf.icolor.next())
 # imshow(imdebug)
 
+# Calculate center line
+centerline = uf.calcline((0, 150), (1000, 150))
+
+# Find inner bound index
+inner_bound_idx = sorted([(i, cv2.contourArea(contours[i])) for i, _ in nest.spot(0)], key=lambda a: a[1])[-1][0]
+nest.delete_node(inner_bound_idx)
+inner_bound = contours[inner_bound_idx]
+
+# # Debug Image Drawing
+# uf.drawContour(imdebug,contours[inner_bound_idx])
+# imshow(imdebug)
+
+
 places = []
 for i, l in nest.spot(0):
     ct = contours[i]
-    places.append(uf.ParkingLot(ct))
+    pklt = uf.ParkingLot(ct)
+    places.append(pklt)
+    pklt.determin_entrance(centerline)
+
+
+assert len(places) == 5, 'Not only 5 contour found'
+
+
+
+
 
 # # Debug Image Drawing
 # for pl in places:
 #     pl.draw(imdebug)
 # imshow(imdebug)
+
 
 

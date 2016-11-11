@@ -44,7 +44,7 @@ def filtering_size_overlap(contours, hierarchy,
                            min_area=criteria.MIN_AREA_CRITERIA,
                            min_area_diff=criteria.MIN_AREA_DIFF_CRITERIA,
                            min_dist=criteria.MIN_DISTANCE_CRITERIA):
-    # type: (list, Hierarchy, int, int, int) -> Hierarchy
+    # type: (list, Hierarchy, int, int, int) -> uf.Hierarchy
 
     # Iteration init
     """

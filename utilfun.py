@@ -129,6 +129,7 @@ class Hierarchy:
     def copy(self):
         return Hierarchy(list(self.hierarchy))
 
+
 class ParkingLot:
     def __init__(self, contour):
         self.contour = contour
@@ -139,14 +140,14 @@ class ParkingLot:
         corners = self.corners
 
         dist_corner_map = []
-        for p in corners:
+        for i, p in enumerate(corners):
             dist_corner_map.append(
-                (dist2line(p, centerline), p)
+                (dist2line(p, centerline), i)
             )
 
         dist_corner_map.sort(key=lambda mp:mp[0])
 
-        print dist_corner_map
+        print map(lambda a: a[1],dist_corner_map)
 
     def draw(self, img):
         print 'drawing'
