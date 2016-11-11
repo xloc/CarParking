@@ -43,10 +43,10 @@ def perspective_analyse(img):
 
     bound = uf.polygonFit(contours[rootidx])
 
-    # Debug Image Drawing
-    imdebug = cv2.cvtColor(imthres, code=cv2.COLOR_GRAY2BGR)
-    uf.drawContour(imdebug,bound)
-    imshow(imdebug)
+    # # Debug Image Drawing
+    # imdebug = cv2.cvtColor(imthres, code=cv2.COLOR_GRAY2BGR)
+    # uf.drawContour(imdebug,bound)
+    # imshow(imdebug)
 
     pspt_param = prop.perspective_param(bound, (1000, 300))
 
