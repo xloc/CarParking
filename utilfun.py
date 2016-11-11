@@ -1,5 +1,7 @@
 import collections
 import itertools
+import cv2
+import numpy as np
 
 
 # Utility function for distance eval
@@ -27,6 +29,10 @@ def calcline(p1, p2):
     c = p2.x * p1.y - p2.y * p1.x
 
     return Line._make((a, b, c))
+
+
+def drawContour(img, contour):
+    return cv2.drawContours(img, [contour], 0, icolor.next())
 
 
 class Hierarchy:
@@ -111,6 +117,31 @@ class Hierarchy:
 
     def copy(self):
         return Hierarchy(list(self.hierarchy))
+
+class ParkingLot:
+    def __init__(self, contour):
+        self.contour = contour
+        self.rect = cv2.minAreaRect(contour)
+        self.corners = cv2.boxPoints(self.rect)
+
+    def determin_entrance(self, centerline):
+        corners = self.corners
+
+        dist_corner_map = []
+        for p in corners:
+            dist_corner_map.append(
+                (dist2line(p, centerline), p)
+            )
+
+        dist_corner_map.sort(key=lambda mp:mp[0])
+
+        print dist_corner_map
+
+    def draw(self, img):
+        print 'drawing'
+        rectct = np.array([[pt] for pt in self.corners], dtype=np.int32)
+        return cv2.drawContours(img, [rectct], 0, (255, 255, 0))
+
 
 colors = [
     (255, 0, 0),
