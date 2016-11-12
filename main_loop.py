@@ -47,7 +47,7 @@ warp_transform = warp_transform
 
 # Inverse transform
 tailored = warp_transform(prepared)
-imshow(prepared)
+
 # Analysis playground
 playground, imthres = detect_playground.playground_analyse(tailored)
 # endregion

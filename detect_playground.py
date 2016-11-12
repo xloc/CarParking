@@ -40,7 +40,8 @@ def perspective_analyse(img, threshold=100):
     #     uf.drawContour(imdebug, contours[ctidx])
     # imshow(imdebug)
 
-    assert len(valid_contour_roots) == 1, 'More than 1 valid contour root found'
+    assert len(valid_contour_roots) == 1, \
+        'Valid contour root count is not 1 (%d found)'%len(valid_contour_roots)
 
     rootidx = valid_contour_roots[0]
 
@@ -49,10 +50,10 @@ def perspective_analyse(img, threshold=100):
 
     bound = uf.polygonFit(contours[rootidx])
 
-    # # Debug Image Drawing
-    # imdebug = cv2.cvtColor(imthres, code=cv2.COLOR_GRAY2BGR)
-    # uf.drawContour(imdebug,bound)
-    # imshow(imdebug)
+    # Debug Image Drawing
+    imdebug = cv2.cvtColor(imthres, code=cv2.COLOR_GRAY2BGR)
+    uf.drawContour(imdebug,bound)
+    imshow(imdebug)
 
     pspt_param = prop.perspective_param(bound, (1000, 300))
 
@@ -87,11 +88,9 @@ def playground_analyse(imtailored):
 
         # Subsection: May need hierarchy criteria
 
-
-    imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
-
     # # Debug Image Drawing
-    # for ctidx,l in nest.spot(0,visual=True):
+    # imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
+    # for ctidx,l in nest.spot(0):
     #     cv2.drawContours(imdebug, [contours[ctidx]], 0, uf.icolor.next())
     # imshow(imdebug)
 
