@@ -62,6 +62,7 @@ imshow(imdebug)
 
 # WORK LOOP
 while True:
+    time.sleep(0.1)
     # region PREPARE IMAGE FRAME
     valid, frame = camera.read()
     # endregion
@@ -89,7 +90,10 @@ while True:
     # endregion
     center, angle = center, angle
 
-    if center is not None:
-        imdebug = cv2.cvtColor(imout, cv2.COLOR_GRAY2BGR)
-        imdebug = detect_car.draw_car(imdebug, center, angle, (0, 255, 0))
-        imshow(imdebug)
+    if center is None:
+        continue
+
+    imdebug = cv2.cvtColor(imout, cv2.COLOR_GRAY2BGR)
+    imdebug = detect_car.draw_car(imdebug, center, angle, (0, 255, 0))
+    cv2.imshow('show', imdebug)
+    print center
