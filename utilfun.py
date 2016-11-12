@@ -87,6 +87,20 @@ def direction_arrow_gen(dir, size):
     return g
 
 
+def calc_angle(origin, target):
+    x = target.x - origin.x
+    y = target.y - origin.y
+
+    cosine = x / ((x * x + y * y) ** 0.5)
+
+    from math import acos, pi
+    return acos(cosine) / 2 / pi * 360
+
+
+def round_each(input):
+    return tuple(map(lambda a: int(round(a)), input))
+
+
 class Hierarchy:
     def __init__(self, hrki):
         self.hierarchy = hrki
