@@ -94,7 +94,9 @@ def calc_angle(origin, target):
     cosine = x / ((x * x + y * y) ** 0.5)
 
     from math import acos, pi
-    return acos(cosine) / 2 / pi * 360
+    if y < 0: sign = 1
+    else: sign = -1
+    return sign * acos(cosine) / 2 / pi * 360
 
 
 def round_each(input):
@@ -204,7 +206,6 @@ class ParkingLot:
         self.direction = dir
 
     def draw(self, img):
-        print 'drawing'
         c = icolor.next()
 
         # rectct = np.array([[pt] for pt in self.corners], dtype=np.int32)
@@ -212,15 +213,19 @@ class ParkingLot:
         p1, _, p2, _ = self.corners
         cv2.rectangle(img, p1, p2, c, 1)
 
-        print self.center
         cv2.circle(img, tuple(map(int, self.center)), 10, c)
 
-        print self.entranceL, self.entranceR
         cv2.line(img, self.entranceL, self.entranceR, c, 3)
 
         p1, p2 = direction_arrow_gen(self.direction, 50)(self.center)
-        print p1, p2
+
         cv2.arrowedLine(img, p2, p1, c, 2)
+
+        # # Debug output
+        # print 'drawing'
+        # print self.center
+        # print self.entranceL, self.entranceR
+        # print p1, p2
 
         return img
 

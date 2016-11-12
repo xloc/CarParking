@@ -59,8 +59,6 @@ imdebug = cv2.cvtColor(imthres, cv2.COLOR_GRAY2BGR)
 playground.draw(imdebug)
 imshow(imdebug)
 
-exit()
-
 
 # WORK LOOP
 while True:

@@ -20,7 +20,17 @@ def car_analysis(image):
     # Find and generally Filter contours
     contours, hierarchy = prop.find_contour(image)
     nest = uf.Hierarchy(hierarchy)
-    nest = prop.filtering_size_overlap(contours, nest, min_area=500, max_area=2000)
+    # Circles area :large=1600, small=340
+    prop.filtering_size_overlap(contours, nest, min_area=200, max_area=2000)
+
+    # # Debug Image Draw and output
+    # imdebug = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    # print 'One iteration'
+    # for i, l in nest.tour(0):
+    #     ct = contours[i]
+    #     uf.drawContour(imdebug, ct)
+    #     print '%5.2f' % cv2.contourArea(ct)
+    #     imshow(imdebug)
 
     # Do specific circle Filter
     marks = []
@@ -30,35 +40,47 @@ def car_analysis(image):
         (x, y), r = cv2.minEnclosingCircle(ct)
         rdarea = 3.14 * r ** 2
 
-        print (rdarea-area)/rdarea
+        # print '%5.2f' % ((rdarea-area)/rdarea)
 
         if (rdarea-area)/rdarea > 0.2:
             nest.delete_node(ctidx)
         else:
             marks.append(((x, y), area))
 
-    # region DEBUG
-    # Debug Image Drawing
-    imdebug = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-    for i, l in nest.tour(0):
-        ct = contours[i]
-        uf.drawContour(imdebug, ct)
-        print cv2.contourArea(ct)
-
-    imshow(imdebug)
-    # endregion
-
-    # # Debug Image Drawing
+    # # Debug Iterate hierarchy
     # imdebug = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-    # for ct, l in nest.tour(0):
-    #     uf.drawContour(imdebug, contours[ct])
-    # imshow(imdebug)
+    # print 'After shape filtering'
+    # for i, l in nest.tour(0):
+    #     ct = contours[i]
+    #
+    #     uf.drawContour(imdebug, ct)
+    #
+    #     area = cv2.contourArea(ct)
+    #     (x, y), r = cv2.minEnclosingCircle(ct)
+    #     rdarea = 3.14 * r ** 2
+    #
+    #     print 'area:%15.2f\tratio:%15.2f' % (area, (rdarea - area) / rdarea)
+    #     imshow(imdebug)
+
+    # # Debug Iterate marks
+    # imdebug = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    # print 'After shape filtering, circle array'
+    # for p, area in marks:
+    #     p = uf.round_each(p)
+    #     cv2.circle(imdebug, p, int(area**0.5), uf.icolor.next())
+    #     print 'radius', int(area**0.5)
+    #     imshow(imdebug)
 
     # Assert found only 2 circles
     assert len(marks) == 2, 'Found circle count is not 2'
 
     # Distinguish two different circle
     marks.sort(key=lambda a: a[1])
+
+    # Debug Print sorting results
+    # print 'Sorted'
+    # for p, area in marks:
+    #     print 'radius', int(area**0.5)
 
     # Extract properties of circles
     smallo = uf.Point._make(marks[0][0])
