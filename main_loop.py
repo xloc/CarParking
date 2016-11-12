@@ -80,17 +80,16 @@ while True:
     imout = imthres
 
     # region CAR GESTURE ANALYSE
+    center, angle = None, None
     try:
         center, angle = detect_car.car_analysis(imout)
-
-
-
-        imdebug = cv2.cvtColor(imout, cv2.COLOR_GRAY2BGR)
-        imdebug = detect_car.draw_car(imdebug, center, angle, (0, 255, 0))
-        imshow(imdebug)
 
     except AssertionError:
         print "DETECT CAR ERROR"
     # endregion
-    # center, angle = center, angle
+    center, angle = center, angle
 
+    if center is not None:
+        imdebug = cv2.cvtColor(imout, cv2.COLOR_GRAY2BGR)
+        imdebug = detect_car.draw_car(imdebug, center, angle, (0, 255, 0))
+        imshow(imdebug)
