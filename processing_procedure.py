@@ -42,9 +42,10 @@ def find_contour(img):
 
 def filtering_size_overlap(contours, hierarchy,
                            min_area=criteria.MIN_AREA_CRITERIA,
+                           max_area=None,
                            min_area_diff=criteria.MIN_AREA_DIFF_CRITERIA,
                            min_dist=criteria.MIN_DISTANCE_CRITERIA):
-    # type: (list, Hierarchy, int, int, int) -> uf.Hierarchy
+    # type: (list, Hierarchy, int, int, int, int) -> uf.Hierarchy
 
     # Iteration init
     """
@@ -52,6 +53,7 @@ def filtering_size_overlap(contours, hierarchy,
     :param contours: Contour input
     :param hierarchy: Hierarchy structure
     :param min_area: Minimum contour size
+    :param max_area: Maximum contour size
     :param min_area_diff: Minimum area difference
     :param min_dist: Minimum distance between center points of contours
     :return:
@@ -65,6 +67,9 @@ def filtering_size_overlap(contours, hierarchy,
         area = cv2.contourArea(ct)
 
         if area < min_area:
+            hierarchy.delete_node(ctidx)
+            continue
+        elif max_area != None and area > max_area:
             hierarchy.delete_node(ctidx)
             continue
 
