@@ -48,6 +48,17 @@ print smallo
 print largeo
 
 
+def calc_angle(po, pt):
+    x = pt.x - po.x
+    y = pt.y - po.y
+
+    cosine = x / ((x*x+y*y)**0.5)
+
+    from math import acos, pi
+    return acos(cosine)/2/pi*360
+
+print calc_angle(largeo, smallo)
+
 imdebug = cv2.cvtColor(imthres, cv2.COLOR_GRAY2BGR)
 for ct, l in nest.tour(0):
     uf.drawContour(imdebug, contours[ct])
