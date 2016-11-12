@@ -32,16 +32,27 @@ def car_analysis(image):
 
         print (rdarea-area)/rdarea
 
-        if (rdarea-area)/rdarea > 0.1:
+        if (rdarea-area)/rdarea > 0.2:
             nest.delete_node(ctidx)
         else:
             marks.append(((x, y), area))
 
-    # Debug Output
-    imdebug = cv2.cvtColor(imthres, cv2.COLOR_GRAY2BGR)
-    for ct, l in nest.tour(0):
-        uf.drawContour(imdebug, contours[ct])
+    # region DEBUG
+    # Debug Image Drawing
+    imdebug = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    for i, l in nest.tour(0):
+        ct = contours[i]
+        uf.drawContour(imdebug, ct)
+        print cv2.contourArea(ct)
+
     imshow(imdebug)
+    # endregion
+
+    # # Debug Image Drawing
+    # imdebug = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    # for ct, l in nest.tour(0):
+    #     uf.drawContour(imdebug, contours[ct])
+    # imshow(imdebug)
 
     # Assert found only 2 circles
     assert len(marks) == 2, 'Found circle count is not 2'

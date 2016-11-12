@@ -7,11 +7,11 @@ from utilfun import imshow
 import processing_procedure as prop
 
 
-def perspective_analyse(img):
+def perspective_analyse(img, threshold=100):
 
     # Section: Threshold processing
 
-    imthres = prop.threshold_process(img, blur_size=7)
+    imthres = prop.threshold_process(img, blur_size=7, threshold=threshold)
 
     # Section: Find contours
 
@@ -33,6 +33,12 @@ def perspective_analyse(img):
         # Subsection: Min nested contour count filtering
 
     valid_contour_roots = prop.filtering_hollow(nest, min_count=6)
+
+    # # Debug Image Drawing
+    # imdebug = cv2.cvtColor(imthres, code=cv2.COLOR_GRAY2BGR)
+    # for ctidx, l in nest.tour(0):
+    #     uf.drawContour(imdebug, contours[ctidx])
+    # imshow(imdebug)
 
     assert len(valid_contour_roots) == 1, 'More than 1 valid contour root found'
 
@@ -59,6 +65,11 @@ def perspective_analyse(img):
 # imshow(imdebug)
 
 def playground_analyse(imtailored):
+    """
+
+    :param imtailored: p-transformed non-threshold image
+    :return: Playground object, Threshold Image
+    """
     # Section: Threshold processing
 
     imtailored = prop.threshold_process(imtailored, blur_size=7)
@@ -95,24 +106,33 @@ def playground_analyse(imtailored):
     # uf.drawContour(imdebug,contours[inner_bound_idx])
     # imshow(imdebug)
 
-    places = []
-    for i, l in nest.spot(0):
-        ct = contours[i]
-        pklt = uf.ParkingLot(ct)
-        places.append(pklt)
+    def each_contour():
+        for i, l in nest.spot(0):
+            yield contours[i]
+
+    return PlayGround(each_contour), imtailored
 
 
-    assert len(places) == 5, 'Not only 5 contour found'
+class PlayGround:
+    def __init__(self, contours):
+        places = []
+        self.places = places
 
-    places.sort(key=lambda a: a.center[0])
-    directions = ['down', 'right', 'left', 'down', 'up']
-    for p, d in zip(places, directions):
-        p.set_dircetion(d)
+        for ct in contours():
+            lot = uf.ParkingLot(ct)
+            places.append(lot)
 
-    # Debug Image Drawing
-    for p, d in zip(places, directions):
-        p.draw(imdebug)
-        imshow(imdebug)
+        assert len(places) == 5, 'Not only 5 contour found'
+
+        places.sort(key=lambda a: a.center[0])
+        directions = ['down', 'right', 'left', 'down', 'up']
+        for p, d in zip(places, directions):
+            p.set_dircetion(d)
+
+    def draw(self, image):
+        for p in self.places:
+            p.draw(image)
+
 
 if __name__ == '__main__':
     # Load Image
@@ -126,5 +146,9 @@ if __name__ == '__main__':
     # Do inverse perspective transformation
     imtailored = prop.warp_perspective(img, pspt_param, (1000, 300))
     # Playground analyse
-    playground_analyse(imtailored)
+    playground, imthres = playground_analyse(imtailored)
+
+    imdebug = cv2.cvtColor(imthres, cv2.COLOR_GRAY2BGR)
+    playground.draw(imdebug)
+    imshow(imdebug)
 

@@ -4,6 +4,10 @@ import utilfun as uf
 import criteria
 
 
+def grayed(img):
+    return cv2.cvtColor(img, code=cv2.COLOR_BGR2GRAY)
+
+
 def threshold_process(img, blur_size=7, threshold=100):
     # type: (np.ndarray, int, int) -> np.ndarray
     """
