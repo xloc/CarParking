@@ -79,13 +79,10 @@ def playground_analyse(imtailored):
 
     imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
 
-    # Debug Image Drawing
-    for ctidx,l in nest.spot(0,visual=True):
-        cv2.drawContours(imdebug, [contours[ctidx]], 0, uf.icolor.next())
-    imshow(imdebug)
-
-    # Calculate center line
-    centerline = uf.calcline((0, 150), (1000, 150))
+    # # Debug Image Drawing
+    # for ctidx,l in nest.spot(0,visual=True):
+    #     cv2.drawContours(imdebug, [contours[ctidx]], 0, uf.icolor.next())
+    # imshow(imdebug)
 
     # Find inner bound index
     inner_bound_idx = sorted([(i, cv2.contourArea(contours[i]))
@@ -98,25 +95,24 @@ def playground_analyse(imtailored):
     # uf.drawContour(imdebug,contours[inner_bound_idx])
     # imshow(imdebug)
 
-
     places = []
     for i, l in nest.spot(0):
         ct = contours[i]
         pklt = uf.ParkingLot(ct)
         places.append(pklt)
-        pklt.determin_entrance(centerline)
 
 
     assert len(places) == 5, 'Not only 5 contour found'
 
+    places.sort(key=lambda a: a.center[0])
+    directions = ['down', 'right', 'left', 'down', 'up']
+    for p, d in zip(places, directions):
+        p.set_dircetion(d)
 
-
-
-
-    # # Debug Image Drawing
-    # for pl in places:
-    #     pl.draw(imdebug)
-    # imshow(imdebug)
+    # Debug Image Drawing
+    for p, d in zip(places, directions):
+        p.draw(imdebug)
+        imshow(imdebug)
 
 if __name__ == '__main__':
     # Load Image

@@ -55,6 +55,38 @@ def resize2(img, expected_width):
 
     return img
 
+
+def calc_rect_points(bounding_rect):
+    x, y, w, h = bounding_rect
+    points = [
+        (x, y),
+        (x + w, y),
+        (x + w, y + h),
+        (x, y + h)
+    ]
+    return points
+
+
+def direction_arrow_gen(dir, size):
+    # type: (str, int) -> (Point, Point)
+    hsz = size//2
+    g = None
+
+    def shift(p, x, y):
+        return p[0]+x, p[1]+y
+
+    if dir is 'up':
+        g = lambda p: (shift(p, 0, -hsz), shift(p, 0, hsz))
+    elif dir is 'down':
+        g = lambda p: (shift(p, 0, hsz), shift(p, 0, -hsz))
+    elif dir is 'left':
+        g = lambda p: (shift(p, -hsz, 0), shift(p, hsz, 0))
+    elif dir is 'right':
+        g = lambda p: (shift(p, hsz, 0), shift(p, -hsz, 0))
+
+    return g
+
+
 class Hierarchy:
     def __init__(self, hrki):
         self.hierarchy = hrki
@@ -142,26 +174,41 @@ class Hierarchy:
 class ParkingLot:
     def __init__(self, contour):
         self.contour = contour
-        self.rect = cv2.minAreaRect(contour)
-        self.corners = cv2.boxPoints(self.rect)
+        self.rect = cv2.boundingRect(contour)
+        self.corners = calc_rect_points(self.rect)
 
-    def determin_entrance(self, centerline):
-        corners = self.corners
+        points = np.array(self.corners)
+        self.center = cv2.minEnclosingCircle(points)[0]
+        self.center = tuple(map(int, self.center))
 
-        dist_corner_map = []
-        for i, p in enumerate(corners):
-            dist_corner_map.append(
-                (dist2line(p, centerline), i)
-            )
+        self.entranceL = self.corners[3]
+        self.entranceR = self.corners[2]
 
-        dist_corner_map.sort(key=lambda mp:mp[0])
+        self.direction = None
 
-        print map(lambda a: a[1],dist_corner_map)
+    def set_dircetion(self, dir):
+        self.direction = dir
 
     def draw(self, img):
         print 'drawing'
-        rectct = np.array([[pt] for pt in self.corners], dtype=np.int32)
-        return cv2.drawContours(img, [rectct], 0, icolor.next())
+        c = icolor.next()
+
+        # rectct = np.array([[pt] for pt in self.corners], dtype=np.int32)
+        # img = cv2.drawContours(img, [rectct], 0, c)
+        p1, _, p2, _ = self.corners
+        cv2.rectangle(img, p1, p2, c, 1)
+
+        print self.center
+        cv2.circle(img, tuple(map(int, self.center)), 10, c)
+
+        print self.entranceL, self.entranceR
+        cv2.line(img, self.entranceL, self.entranceR, c, 3)
+
+        p1, p2 = direction_arrow_gen(self.direction, 50)(self.center)
+        print p1, p2
+        cv2.arrowedLine(img, p2, p1, c, 2)
+
+        return img
 
 
 colors = [
