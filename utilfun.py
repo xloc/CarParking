@@ -106,13 +106,13 @@ class Hierarchy:
         self.hierarchy = hrki
 
     def tour(self, node, layer=0, visual=False):
-        def p(text):
-            print '%s%s' % ('\t' * layer, text)
+        def p(text, n=''):
+            print '%s%s%s' % ('\t' * layer, text, n)
 
-        p = p if visual else lambda x: None
+        p = p if visual else lambda *x: None
 
         while True:
-            p('> %s' % node)
+            p('> ', node)
             if self.hierarchy[node][1] != -2:
                 yield node, layer
 
