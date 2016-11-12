@@ -7,7 +7,7 @@ import processing_procedure as prop
 from utilfun import imshow
 
 # Load Image
-img = cv2.imread('mark.jpg')
+img = cv2.imread('cell.jpg')
 # Convert Color
 img = cv2.cvtColor(img, code=cv2.COLOR_BGR2GRAY)
 # Resize
@@ -19,7 +19,7 @@ imtailored = prop.warp_perspective(img, pspt_param, (1000, 300))
 
 
 imthres = prop.threshold_process(imtailored)
-
+imshow(imthres)
 
 contours, hierarchy = prop.find_contour(imthres)
 nest = uf.Hierarchy(hierarchy)
@@ -32,10 +32,13 @@ for ctidx, l in nest.tour(0):
     area = cv2.contourArea(ct)
     (x, y), r = cv2.minEnclosingCircle(ct)
     rdarea = 3.14 * r ** 2
-    if (rdarea-area) > 100:
+
+    print (rdarea-area)/rdarea
+
+    if (rdarea-area)/rdarea > 0.1:
         nest.delete_node(ctidx)
     else:
-        marks.append(( (x, y), area))
+        marks.append(((x, y), area))
 
 marks.sort(key=lambda a: a[1])
 
