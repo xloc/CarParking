@@ -7,6 +7,8 @@ import processing_procedure as prop
 import detect_car
 import detect_playground
 
+import threading
+
 from utilfun import imshow
 
 PLAYGROUND_PIC_SIZE = (1000, 300)
@@ -103,7 +105,38 @@ def gesture_analysis(warp_transform):
     else:
         return center, angle
 
+
+class Record:
+    def __init__(self, warp_transform, playground):
+        self.warp_t = warp_transform
+        self.playground = playground
+
+        self.carpos = uf.Point(x=0, y=0)
+        self.cardir = 0
+
+        self.done = False
+
+        self.thread = threading.Thread(target=self.capture_analysis)
+
+    def get_playground(self):
+        return self.playground
+
+    def start_analysis(self):
+        self.thread.start()
+
+    def capture_analysis(self):
+        while not self.done:
+            rtn = gesture_analysis(self.warp_t)
+            if rtn is None:
+                continue
+
+            self.carpos = uf.Point(*rtn[0])
+            self.cardir = rtn[1]
+
+
 if __name__ == '__main__':
     warp_fn, pg = playground_analysis()
-    while True:
-        gesture_analysis(warp_transform=warp_fn)
+
+    rd = Record(warp_fn, pg)
+
+    rd.start_analysis()
