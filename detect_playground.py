@@ -102,11 +102,11 @@ def playground_analyse(imtailored):
 
         # Subsection: May need hierarchy criteria
 
-    # # Debug Image Drawing
-    # imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
-    # for ctidx,l in nest.tour(0):
-    #     cv2.drawContours(imdebug, [contours[ctidx]], 0, uf.icolor.next())
-    # imshow(imdebug)
+    # Debug Image Drawing
+    imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
+    for ctidx,l in nest.tour(0):
+        cv2.drawContours(imdebug, [contours[ctidx]], 0, uf.icolor.next())
+    imshow(imdebug)
 
     # # Find inner bound index
     # inner_bound_idx = sorted([(i, cv2.contourArea(contours[i]))

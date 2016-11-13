@@ -95,14 +95,14 @@ def gesture_analysis(warp_transform):
     # endregion
     center, angle = center, angle
 
-    imdebug = cv2.cvtColor(imout, cv2.COLOR_GRAY2BGR)
-    imdebug = detect_car.draw_car(imdebug, center, angle, (0, 255, 0))
-    cv2.imshow('show', imdebug)
-    print center
-
     if center is None:
         return None
     else:
+        imdebug = cv2.cvtColor(imout, cv2.COLOR_GRAY2BGR)
+        imdebug = detect_car.draw_car(imdebug, center, angle, (0, 255, 0))
+        cv2.imshow('show', imdebug)
+        print center
+
         return center, angle
 
 
