@@ -10,10 +10,10 @@ import detect_playground
 from utilfun import imshow
 
 PLAYGROUND_PIC_SIZE = (1000, 300)
-THRESHOLD_VALUE = 50
+THRESHOLD_VALUE = 110
 IMAGE_WIDTH = 1000
 
-camera = cv2.VideoCapture(2)
+camera = cv2.VideoCapture(0)
 assert camera.isOpened(), 'Camera is not properly opened'
 
 # region PREPARE PICTURE FOR ANALYSIS

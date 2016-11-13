@@ -78,35 +78,49 @@ def playground_analyse(imtailored):
     # Section: 2nd Contours find
     contours, hierarchy = prop.find_contour(imtailored)
 
+    # # Debug Image Drawing
+    # imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
+    # for ct in contours:
+    #     uf.drawContour(imdebug, ct)
+    # imshow(imdebug)
+
     # Section: 2nd Contours filtering
     # Prepare hierarchy
     nest = uf.Hierarchy(hierarchy)
 
+    print nest.hierarchy
+
+    # # Debug Image Drawing
+    # imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
+    # for ctidx, l in nest.tour(0, visual=True):
+    #     uf.drawContour(imdebug, contours[ctidx])
+    # imshow(imdebug)
+
         # Subsection: 2nd Area and Distance filtering
 
-    nest = prop.filtering_size_overlap(contours, nest, min_area=1000)
+    nest = prop.filtering_size_overlap(contours, nest, min_area=1000, max_area=5000)
 
         # Subsection: May need hierarchy criteria
 
-    # Debug Image Drawing
-    imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
-    for ctidx,l in nest.spot(0):
-        cv2.drawContours(imdebug, [contours[ctidx]], 0, uf.icolor.next())
-    imshow(imdebug)
+    # # Debug Image Drawing
+    # imdebug = cv2.cvtColor(imtailored, code=cv2.COLOR_GRAY2BGR)
+    # for ctidx,l in nest.tour(0):
+    #     cv2.drawContours(imdebug, [contours[ctidx]], 0, uf.icolor.next())
+    # imshow(imdebug)
 
-    # Find inner bound index
-    inner_bound_idx = sorted([(i, cv2.contourArea(contours[i]))
-                              for i, _ in nest.spot(0)],
-                             key=lambda a: a[1])[-1][0]
-    nest.delete_node(inner_bound_idx)
-    inner_bound = contours[inner_bound_idx]
+    # # Find inner bound index
+    # inner_bound_idx = sorted([(i, cv2.contourArea(contours[i]))
+    #                           for i, _ in nest.spot(0)],
+    #                          key=lambda a: a[1])[-1][0]
+    # nest.delete_node(inner_bound_idx)
+    # inner_bound = contours[inner_bound_idx]
 
     # # Debug Image Drawing
     # uf.drawContour(imdebug,contours[inner_bound_idx])
     # imshow(imdebug)
 
     def each_contour():
-        for i, l in nest.spot(0):
+        for i, l in nest.tour(0):
             yield contours[i]
 
     return PlayGround(each_contour), imtailored
