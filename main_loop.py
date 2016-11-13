@@ -65,44 +65,45 @@ def playground_analysis():
     return warp_transform, playground
 
 def gesture_analysis(warp_transform):
-    # WORK LOOP
-    while True:
-        cv2.waitKey(100)
-        # region PREPARE IMAGE FRAME
-        valid, frame = camera.read()
-        # endregion
-        frame = frame
+    cv2.waitKey(100)
+    # region PREPARE IMAGE FRAME
+    valid, frame = camera.read()
+    # endregion
+    frame = frame
 
-        # region PRE-PROCESSING
-        # Grayed
-        gray = prop.grayed(frame)
-        # Resize
-        fitted = uf.resize2(gray, IMAGE_WIDTH)
-        # Warp transform
-        tailored = warp_transform(fitted)
-        # Threshold
-        imthres = prop.threshold_process(tailored, threshold=THRESHOLD_VALUE)
-        # endregion
-        imout = imthres
+    # region PRE-PROCESSING
+    # Grayed
+    gray = prop.grayed(frame)
+    # Resize
+    fitted = uf.resize2(gray, IMAGE_WIDTH)
+    # Warp transform
+    tailored = warp_transform(fitted)
+    # Threshold
+    imthres = prop.threshold_process(tailored, threshold=THRESHOLD_VALUE)
+    # endregion
+    imout = imthres
 
-        # region CAR GESTURE ANALYSE
-        center, angle = None, None
-        try:
-            center, angle = detect_car.car_analysis(imout)
+    # region CAR GESTURE ANALYSE
+    center, angle = None, None
+    try:
+        center, angle = detect_car.car_analysis(imout)
 
-        except AssertionError:
-            print "DETECT CAR ERROR"
-        # endregion
-        center, angle = center, angle
+    except AssertionError:
+        print "DETECT CAR ERROR"
+    # endregion
+    center, angle = center, angle
 
-        if center is None:
-            continue
+    imdebug = cv2.cvtColor(imout, cv2.COLOR_GRAY2BGR)
+    imdebug = detect_car.draw_car(imdebug, center, angle, (0, 255, 0))
+    cv2.imshow('show', imdebug)
+    print center
 
-        imdebug = cv2.cvtColor(imout, cv2.COLOR_GRAY2BGR)
-        imdebug = detect_car.draw_car(imdebug, center, angle, (0, 255, 0))
-        cv2.imshow('show', imdebug)
-        print center
+    if center is None:
+        return None
+    else:
+        return center, angle
 
 if __name__ == '__main__':
     warp_fn, pg = playground_analysis()
-    gesture_analysis(warp_transform=warp_fn)
+    while True:
+        gesture_analysis(warp_transform=warp_fn)
