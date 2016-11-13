@@ -47,6 +47,26 @@ def polygonFit(contour, factor=0.05):
 
 
 def resize2(img, expected_width):
+
+    mtx = [[805.9192690236115, 0.0, 389.50794220736464],
+           [0.0, 805.2953556421901, 185.50152151842346],
+            [0.0, 0.0, 1.0]]
+    dist = [[0.17336845385041066, -1.312150071184175, 0.0011711184651027966,
+             0.002950558109854578, 1.9741523238852574]]
+
+    mtx, dist = map(np.array, [mtx, dist])
+
+    # Prepare image
+    h, w = img.shape[:2]
+    camera_mtx, roi = cv2.getOptimalNewCameraMatrix(mtx, dist, (w, h), 1, (w, h))
+    # print camera_mtx, roi
+
+    # undistort
+    dst = cv2.undistort(img, mtx, dist, None, camera_mtx)
+    # crop the image
+    x, y, w, h = roi
+    img = dst[y:y + h, x:x + w]
+
     height, width = img.shape
 
     factor = float(width) / expected_width
